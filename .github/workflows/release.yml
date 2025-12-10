@@ -32,23 +32,14 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Run semantic-release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
-
       - name: Create plugin package
-        if: success()
         run: |
           mkdir ${{ env.PLUGIN_NAME }}
           cp README.md package.json ${{ env.PLUGIN_NAME }}
           mv dist ${{ env.PLUGIN_NAME }}
           zip -r ${{ env.PLUGIN_NAME }}.zip ${{ env.PLUGIN_NAME }}
 
-      - name: Upload release assets
-        if: success()
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ./${{ env.PLUGIN_NAME }}.zip
+      - name: Run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
