@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/Nillorian/logseq-plugin-deepl-translate/compare/v1.1.0...v1.1.1) (2025-12-10)
+
+
+### Bug Fixes
+
+* remove manual release step, let semantic-release handle it ([d125695](https://github.com/Nillorian/logseq-plugin-deepl-translate/commit/d1256954b3a522ea9f8d6a1a69f3cf48c2f48faa))
+
 # [1.1.0](https://github.com/Nillorian/logseq-plugin-deepl-translate/compare/v1.0.2...v1.1.0) (2025-12-10)
 
 
