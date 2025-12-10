@@ -87,10 +87,6 @@ Open plugin settings to customize:
 ### "Translation failed: DeepL API error 400: Bad request. Reason: Value for 'target_lang' not supported."
 - ✅ Use only legal language code like 'DE'
 
-### Translation takes too long
-- ✅ Check internet connection
-- ✅ Check DeepL API status at https://status.deepl.com/
-
 ## Project Structure
 
 ```
