@@ -1,0 +1,31 @@
+{
+  "name": "logseq-deepl-translate",
+  "version": "1.0.0",
+  "description": "Translate block text using DeepL API.",
+  "main": "dist/index.js",
+  "author": "Nillorian",
+  "license": "MIT",
+  "logseq": {
+    "id": "_deepl_translator_plugin",
+    "title": "DeepL Translator",
+    "icon": "logo.png"
+  },
+  "scripts": {
+    "build": "rm -rf dist && esbuild src/index.ts --bundle --platform=browser --outfile=dist/index.js",
+    "release": "semantic-release"
+  },
+  "dependencies": {
+    "@logseq/libs": "^0.2.9"
+  },
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.0",
+    "@semantic-release/commit-analyzer": "^10.0.0",
+    "@semantic-release/git": "^10.0.0",
+    "@semantic-release/github": "^8.0.0",
+    "@semantic-release/release-notes-generator": "^10.0.0",
+    "@types/node": "^20.0.0",
+    "esbuild": "^0.27.1",
+    "semantic-release": "^25.0.2",
+    "typescript": "^5.0.0"
+  }
+}
