@@ -87,6 +87,9 @@ Open plugin settings to customize:
 ### "Translation failed: DeepL API error 400: Bad request. Reason: Value for 'target_lang' not supported."
 - ✅ Use only legal language code like 'DE'
 
+### Translation failed: DeepL API error 456: Quota Exceeded 
+- ✅ Your API plan has reached its limitations. Wait until the next billing period, or update to pro.
+
 ## Project Structure
 
 ```
