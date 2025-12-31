@@ -3105,6 +3105,48 @@
       return null;
     }
   }
+  async function getSubBlocks(blockId) {
+    try {
+      const block = await logseq.Editor.getBlock(blockId, { includeChildren: true });
+      if (!block) {
+        console.warn("Block not found for sub-blocks:", blockId);
+        return [];
+      }
+      const children = block.children || [];
+      console.log("Sub-blocks found:", { blockId, count: children.length, children: children.map((c) => ({ id: c.id || c.uuid, content: (c.content || "").substring(0, 50) })) });
+      return children;
+    } catch (error) {
+      console.error("Failed to get sub-blocks:", { blockId, error });
+      return [];
+    }
+  }
+  function getBlockId(block) {
+    if (block.uuid) return block.uuid;
+    if (block["block/uuid"]) return block["block/uuid"];
+    if (block.id && typeof block.id === "string") return block.id;
+    if (block["db/id"] && typeof block["db/id"] === "number") {
+      return block["db/id"].toString();
+    }
+    if (block.id && typeof block.id === "number") {
+      return block.id.toString();
+    }
+    return null;
+  }
+  async function collectAllBlockIds(blockId) {
+    const blockIds = [blockId];
+    const children = await getSubBlocks(blockId);
+    for (const child of children) {
+      const childId = getBlockId(child);
+      console.log("Processing child:", { blockId, childId, childKeys: Object.keys(child || {}) });
+      if (childId) {
+        const subBlockIds = await collectAllBlockIds(childId);
+        blockIds.push(...subBlockIds);
+      } else {
+        console.warn("Child has no valid ID:", { blockId, child });
+      }
+    }
+    return blockIds;
+  }
   async function handleTranslation(blockId) {
     if (!deepLClient) {
       if (!initializeDeepLClient()) {
@@ -3171,8 +3213,76 @@
       logseq.UI.showMsg(`\u274C ${errorMessage}`, "error");
     }
   }
+  async function handleInlineTranslationWithSubBlocks(blockId) {
+    if (!deepLClient) {
+      if (!initializeDeepLClient()) {
+        return;
+      }
+    }
+    try {
+      logseq.UI.showMsg("\u{1F4E6} Collecting blocks...", "info");
+      const allBlockIds = await collectAllBlockIds(blockId);
+      if (allBlockIds.length === 0) {
+        logseq.UI.showMsg("\u26A0\uFE0F No blocks found to translate", "warning");
+        return;
+      }
+      const settings = logseq.settings;
+      const targetLang = settings?.defaultTargetLang || "EN";
+      logseq.UI.showMsg(`\u23F3 Translating ${allBlockIds.length} block(s)...`, "info");
+      let successCount = 0;
+      let failureCount = 0;
+      const failedErrors = [];
+      for (const currentBlockId of allBlockIds) {
+        try {
+          const blockContent = await getBlockContent(currentBlockId);
+          if (!blockContent) {
+            failureCount++;
+            failedErrors.push(`\u2022 Block ${currentBlockId}: No content found`);
+            continue;
+          }
+          const translationRequest = {
+            text: blockContent,
+            targetLang,
+            sourceLang: void 0
+          };
+          if (!deepLClient) {
+            failureCount++;
+            failedErrors.push(`\u2022 Block ${currentBlockId}: DeepL client not initialized`);
+            continue;
+          }
+          const result = await deepLClient.translate(translationRequest);
+          await logseq.Editor.updateBlock(currentBlockId, result.translated);
+          successCount++;
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : "Unknown error";
+          failureCount++;
+          failedErrors.push(`\u2022 Block ${currentBlockId}: ${errorMsg}`);
+        }
+      }
+      if (failureCount === 0) {
+        logseq.UI.showMsg(`\u2705 Successfully translated all ${successCount} block(s)!`, "success");
+      } else if (successCount === 0) {
+        await translationDialog.showErrorDialog(
+          `Failed to translate all blocks:
+
+${failedErrors.join("\n")}`
+        );
+      } else {
+        await translationDialog.showErrorDialog(
+          `Translated ${successCount}/${allBlockIds.length} block(s)
+
+Failed blocks:
+${failedErrors.join("\n")}`
+        );
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      logseq.UI.showMsg(`\u274C ${errorMessage}`, "error");
+    }
+  }
   async function main() {
     console.info(`#${pluginId}: MAIN`);
+    logseq.App.showMsg(`\u2764\uFE0F  Message from Plugin : ${pluginId}`);
     if (!translationDialog) {
       translationDialog = new TranslationDialog();
     }
@@ -3192,6 +3302,14 @@
           const blockId = typeof e === "string" ? e : e.blockId || e.uuid || e["block/uuid"];
           console.info(`Inline translating block:`, { blockId });
           await handleInlineTranslation(blockId);
+        }
+      );
+      logseq.Editor.registerBlockContextMenuItem(
+        "\u{1F310} Replace with Translation + Sub-blocks",
+        async (e) => {
+          const blockId = typeof e === "string" ? e : e.blockId || e.uuid || e["block/uuid"];
+          console.info(`Inline translating block with sub-blocks:`, { blockId });
+          await handleInlineTranslationWithSubBlocks(blockId);
         }
       );
       menuRegistered = true;
