@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/Nillorian/logseq-plugin-deepl-translate/compare/v1.1.2...v1.2.0) (2025-12-31)
+
+
+### Features
+
+* add recursive block translation option ([8ba21dc](https://github.com/Nillorian/logseq-plugin-deepl-translate/commit/8ba21dc060eafa1df02dcf3a22d066f422bdff67))
+
 ## [1.1.2](https://github.com/Nillorian/logseq-plugin-deepl-translate/compare/v1.1.1...v1.1.2) (2025-12-10)
 
 
