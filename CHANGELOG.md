@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/Nillorian/logseq-plugin-deepl-translate/compare/v1.2.0...v1.2.1) (2026-01-02)
+
+
+### Bug Fixes
+
+* add logo to release ([7a627b7](https://github.com/Nillorian/logseq-plugin-deepl-translate/commit/7a627b7ad843c176babd02e1b05213dc67cc769f))
+
 # [1.2.0](https://github.com/Nillorian/logseq-plugin-deepl-translate/compare/v1.1.2...v1.2.0) (2025-12-31)
 
 
