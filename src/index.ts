@@ -346,6 +346,13 @@ async function handleInlineTranslationWithSubBlocks(blockId: string): Promise<vo
 async function main() {
   console.info(`#${pluginId}: MAIN`);
 
+  try {
+    // Register settings schema at runtime to avoid loader issues if host lacks certain methods
+    logseq.useSettingsSchema(settingsSchema);
+  } catch (e) {
+    console.warn('Failed to register settings schema (non-fatal):', e);
+  }
+
   logseq.UI.showMsg(`❤️ Message from : ${pluginId}`);
 
   // Initialize translation dialog lazily
@@ -399,9 +406,6 @@ async function main() {
 
   console.info(`#${pluginId}: Loaded successfully`);
 }
-
-// Set plugin settings schema
-logseq.useSettingsSchema(settingsSchema);
 
 // Bootstrap
 logseq.ready(main).catch(console.error);
