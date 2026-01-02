@@ -1,3 +1,11 @@
+## [1.2.2](https://github.com/Nillorian/logseq-plugin-deepl-translate/compare/v1.2.1...v1.2.2) (2026-01-02)
+
+
+### Bug Fixes
+
+* move settings register outside main function ([c3e742e](https://github.com/Nillorian/logseq-plugin-deepl-translate/commit/c3e742e6b472e4c1d123218d46c7161d3b2de58c))
+* update index.js reference ([25e0833](https://github.com/Nillorian/logseq-plugin-deepl-translate/commit/25e0833a47d088b013f71cd5bfd95ec557c011b5))
+
 ## [1.2.1](https://github.com/Nillorian/logseq-plugin-deepl-translate/compare/v1.2.0...v1.2.1) (2026-01-02)
 
 
