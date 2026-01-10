@@ -1,6 +1,6 @@
 {
   "name": "logseq-plugin-deepl-translate",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "Translate block text using DeepL API.",
   "main": "index.html",
   "author": "Nillorian",
