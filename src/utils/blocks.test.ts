@@ -7,6 +7,7 @@ import {
   LogseqBlockNode,
 } from './blocks';
 import { setupLogseqMock, resetLogseqMock, mockLogseq } from '../__mocks__/logseq';
+import { exampleBlockNode, exampleHeadlineWithSubBlockNode, exampleSubBlockNode } from '../__fixtures__/logseq-examples';
 
 beforeEach(() => setupLogseqMock());
 afterEach(() => resetLogseqMock());
@@ -40,6 +41,10 @@ describe('getBlockId', () => {
 
   it('returns block/uuid when uuid is absent', () => {
     expect(getBlockId({ 'block/uuid': 'bq-uuid' })).toBe('bq-uuid');
+  });
+
+  it('returns id from stored Logseq example block data', () => {
+    expect(getBlockId(exampleBlockNode)).toBe('69edc5c5-662d-4495-bfd6-c120dd891276');
   });
 
   it('returns string id when uuid fields absent', () => {
@@ -106,6 +111,17 @@ describe('collectAllBlockIds', () => {
       .mockResolvedValueOnce({ uuid: 'grandchild-1', children: [] });
 
     expect(await collectAllBlockIds('root')).toEqual(['root', 'child-1', 'grandchild-1']);
+  });
+
+  it('collects ids from stored headline and sub-block fixture', async () => {
+    mockLogseq.Editor.getBlock
+      .mockResolvedValueOnce(exampleHeadlineWithSubBlockNode)
+      .mockResolvedValueOnce(exampleSubBlockNode);
+
+    expect(await collectAllBlockIds('69edc5c5-662d-4495-bfd6-c120dd891276')).toEqual([
+      '69edc5c5-662d-4495-bfd6-c120dd891276',
+      '69edc5d8-0297-4a1c-a67b-ac058defd0ed',
+    ]);
   });
 
   it('skips children with no valid id', async () => {
