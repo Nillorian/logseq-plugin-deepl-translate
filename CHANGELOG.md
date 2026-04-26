@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/Nillorian/logseq-plugin-deepl-translate/compare/v1.2.7...v1.3.0) (2026-04-26)
+
+
+### Features
+
+* add customizable keyboard shortcuts for translation actions ([19facc7](https://github.com/Nillorian/logseq-plugin-deepl-translate/commit/19facc789d1df8ab359bce93f25100d919561a5f))
+
 ## [1.2.7](https://github.com/Nillorian/logseq-plugin-deepl-translate/compare/v1.2.6...v1.2.7) (2026-01-02)
 
 
