@@ -1,10 +1,20 @@
 import { TranslationResult } from '../types/index';
 
+interface LogseqUIConfig {
+  key: string;
+  close: 'outside' | 'inside';
+  template: string;
+  style: Record<string, string>;
+  attrs?: Record<string, string>;
+  reset?: boolean;
+}
+
 /**
  * UI Dialog Component for translation display
  */
 export class TranslationDialog {
-  private dialogKey = 'deepl-translation-dialog';
+  // Use a per-instance key to avoid stale DOM collisions during plugin reload/dispose.
+  private readonly dialogKey = `deepl-translation-dialog-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   /**
    * Show translation result in a dialog
@@ -17,9 +27,10 @@ export class TranslationDialog {
   ): void {
     const template = this.buildTemplate(result);
 
-    const dialogConfig: any = {
+    const dialogConfig: LogseqUIConfig = {
       key: this.dialogKey,
       close: 'outside',
+      reset: true,
       template,
       style: {
         backgroundColor: 'var(--ls-primary-background-color)',
@@ -54,9 +65,10 @@ export class TranslationDialog {
       </div>
     `;
 
-    const dialogConfig: any = {
+    const dialogConfig: LogseqUIConfig = {
       key: this.dialogKey,
       close: 'outside',
+      reset: true,
       template,
       style: {
         backgroundColor: 'var(--ls-primary-background-color)',
@@ -94,9 +106,10 @@ export class TranslationDialog {
       </div>
     `;
 
-    const dialogConfig: any = {
+    const dialogConfig: LogseqUIConfig = {
       key: this.dialogKey,
       close: 'outside',
+      reset: true,
       template,
       style: {
         backgroundColor: 'var(--ls-primary-background-color)',
