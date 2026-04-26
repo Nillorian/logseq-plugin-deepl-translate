@@ -29,17 +29,110 @@ const settingsSchema: SettingSchemaDesc[] = [
     title: 'Use Pro API',
     description: 'Enable if you have a DeepL Pro account',
   },
+  {
+    key: 'translateShortcut',
+    type: 'string',
+    default: '',
+    title: 'Shortcut: Translate',
+    description: 'Optional keyboard shortcut for "Translate" (e.g., mod+shift+t)',
+  },
+  {
+    key: 'replaceShortcut',
+    type: 'string',
+    default: '',
+    title: 'Shortcut: Replace with Translation',
+    description: 'Optional keyboard shortcut for "Replace with Translation" (e.g., mod+shift+r)',
+  },
+  {
+    key: 'replaceSubBlocksShortcut',
+    type: 'string',
+    default: '',
+    title: 'Shortcut: Replace with Translation + Sub-blocks',
+    description: 'Optional keyboard shortcut for "Replace with Translation + Sub-blocks" (e.g., mod+shift+b)',
+  },
 ];
 
 let deepLClient: DeepLClient | null = null;
 let translationDialog: TranslationDialog;
 let menuRegistered = false;
 
+type PluginSettings = {
+  apiKey?: string;
+  defaultTargetLang?: string;
+  isPro?: boolean;
+  translateShortcut?: string;
+  replaceShortcut?: string;
+  replaceSubBlocksShortcut?: string;
+};
+
+function getSettings(): PluginSettings {
+  return (logseq.settings as PluginSettings) || {};
+}
+
+function getShortcutDisplay(shortcut?: string): string {
+  return (shortcut || '').trim();
+}
+
+function withShortcutLabel(label: string, shortcut?: string): string {
+  const display = getShortcutDisplay(shortcut);
+  return display ? `${label} --- (${display})` : label;
+}
+
+function normalizeBlockIdFromEvent(e: any): string | null {
+  if (typeof e === 'string') return e;
+  return (e?.blockId || e?.uuid || e?.['block/uuid'] || null) as string | null;
+}
+
+async function getCurrentBlockId(): Promise<string | null> {
+  try {
+    const currentBlock = await logseq.Editor.getCurrentBlock();
+    if (!currentBlock) {
+      return null;
+    }
+    return (currentBlock.uuid || (currentBlock as any)['block/uuid'] || null) as string | null;
+  } catch (error) {
+    console.error('Failed to get current block:', error);
+    return null;
+  }
+}
+
+function registerShortcutAction(
+  shortcut: string | undefined,
+  actionName: string,
+  handler: () => Promise<void>
+): void {
+  const binding = (shortcut || '').trim();
+  if (!binding) {
+    return;
+  }
+
+  try {
+    logseq.App.registerCommandShortcut({
+      binding,
+    }, () => {
+      void handler();
+    });
+  } catch (error) {
+    console.warn(`Failed to register shortcut for ${actionName}:`, { binding, error });
+    logseq.UI.showMsg(`⚠️ Invalid shortcut for ${actionName}: ${binding}`, 'warning');
+  }
+}
+
+async function runOnCurrentBlock(actionName: string, action: (blockId: string) => Promise<void>): Promise<void> {
+  const blockId = await getCurrentBlockId();
+  if (!blockId) {
+    logseq.UI.showMsg(`⚠️ No active block found for ${actionName}`, 'warning');
+    return;
+  }
+
+  await action(blockId);
+}
+
 /**
  * Initialize DeepL client from settings
  */
 function initializeDeepLClient(): boolean {
-  const settings = logseq.settings as any;
+  const settings = getSettings();
 
   if (!settings?.apiKey) {
     logseq.UI.showMsg(
@@ -50,7 +143,7 @@ function initializeDeepLClient(): boolean {
   }
 
   try {
-    const isPro = (settings.isPro as boolean) || false;
+    const isPro = settings.isPro || false;
     deepLClient = new DeepLClient(settings.apiKey as string, isPro);
     return true;
   } catch (error) {
@@ -183,8 +276,8 @@ async function handleTranslation(blockId: string): Promise<void> {
     }
 
     // Get target language from settings
-    const settings = logseq.settings as any;
-    const targetLang = (settings?.defaultTargetLang as string) || 'EN';
+    const settings = getSettings();
+    const targetLang = settings.defaultTargetLang || 'EN';
 
     // Create translation request
     const translationRequest: TranslationRequest = {
@@ -229,8 +322,8 @@ async function handleInlineTranslation(blockId: string): Promise<void> {
     }
 
     // Get target language from settings
-    const settings = logseq.settings as any;
-    const targetLang = (settings?.defaultTargetLang as string) || 'EN';
+    const settings = getSettings();
+    const targetLang = settings.defaultTargetLang || 'EN';
 
     // Show loading state with a notification
     logseq.UI.showMsg('⏳ Translating...', 'info');
@@ -282,8 +375,8 @@ async function handleInlineTranslationWithSubBlocks(blockId: string): Promise<vo
     }
 
     // Get target language from settings
-    const settings = logseq.settings as any;
-    const targetLang = (settings?.defaultTargetLang as string) || 'EN';
+    const settings = getSettings();
+    const targetLang = settings.defaultTargetLang || 'EN';
 
     logseq.UI.showMsg(`⏳ Translating ${allBlockIds.length} block(s)...`, 'info');
 
@@ -362,13 +455,34 @@ async function main() {
 
   // Register block context menu item only once
   if (!menuRegistered) {
+    const settings = getSettings();
+
+    registerShortcutAction(
+      settings.translateShortcut,
+      'Translate',
+      async () => runOnCurrentBlock('Translate', handleTranslation)
+    );
+
+    registerShortcutAction(
+      settings.replaceShortcut,
+      'Replace with Translation',
+      async () => runOnCurrentBlock('Replace with Translation', handleInlineTranslation)
+    );
+
+    registerShortcutAction(
+      settings.replaceSubBlocksShortcut,
+      'Replace with Translation + Sub-blocks',
+      async () => runOnCurrentBlock('Replace with Translation + Sub-blocks', handleInlineTranslationWithSubBlocks)
+    );
+
     logseq.Editor.registerBlockContextMenuItem(
-      '🌐 Translate',
+      withShortcutLabel('🌐 Translate', settings.translateShortcut),
       async (e: any) => {
-        // Handle both formats: direct blockId string or block object with uuid
-        const blockId = typeof e === 'string' 
-          ? e 
-          : (e.blockId || e.uuid || e['block/uuid']);
+        const blockId = normalizeBlockIdFromEvent(e);
+        if (!blockId) {
+          logseq.UI.showMsg('⚠️ Could not determine block for Translate', 'warning');
+          return;
+        }
         
         console.info(`Translating block:`, { blockId, eventType: typeof e, eventKeys: Object.keys(e || {}) });
         await handleTranslation(blockId);
@@ -376,12 +490,13 @@ async function main() {
     );
 
     logseq.Editor.registerBlockContextMenuItem(
-      '🌐 Replace with Translation',
+      withShortcutLabel('🌐 Replace with Translation', settings.replaceShortcut),
       async (e: any) => {
-        // Handle both formats: direct blockId string or block object with uuid
-        const blockId = typeof e === 'string' 
-          ? e 
-          : (e.blockId || e.uuid || e['block/uuid']);
+        const blockId = normalizeBlockIdFromEvent(e);
+        if (!blockId) {
+          logseq.UI.showMsg('⚠️ Could not determine block for Replace with Translation', 'warning');
+          return;
+        }
         
         console.info(`Inline translating block:`, { blockId });
         await handleInlineTranslation(blockId);
@@ -389,12 +504,13 @@ async function main() {
     );
 
     logseq.Editor.registerBlockContextMenuItem(
-      '🌐 Replace with Translation + Sub-blocks',
+      withShortcutLabel('🌐 Replace with Translation + Sub-blocks', settings.replaceSubBlocksShortcut),
       async (e: any) => {
-        // Handle both formats: direct blockId string or block object with uuid
-        const blockId = typeof e === 'string' 
-          ? e 
-          : (e.blockId || e.uuid || e['block/uuid']);
+        const blockId = normalizeBlockIdFromEvent(e);
+        if (!blockId) {
+          logseq.UI.showMsg('⚠️ Could not determine block for Replace with Translation + Sub-blocks', 'warning');
+          return;
+        }
         
         console.info(`Inline translating block with sub-blocks:`, { blockId });
         await handleInlineTranslationWithSubBlocks(blockId);
