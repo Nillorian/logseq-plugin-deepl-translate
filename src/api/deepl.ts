@@ -1,4 +1,5 @@
 import { TranslationRequest, TranslationResponse, TranslationResult } from '../types/index';
+import { version } from '../../package.json';
 
 /**
  * DeepL API Client
@@ -35,7 +36,7 @@ export class DeepLClient {
         headers: {
           'Authorization': `DeepL-Auth-Key ${this.apiKey}`,
           'Content-Type': 'application/json',
-          'User-Agent': 'logseq-deepl-translator/0.0.1',
+          'User-Agent': `logseq-deepl-translator/${version}`,
         },
         body: JSON.stringify({
           text: [request.text],

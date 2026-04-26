@@ -1,5 +1,13 @@
 import { TranslationResult } from '../types/index';
 
+interface LogseqUIConfig {
+  key: string;
+  close: 'outside' | 'inside';
+  template: string;
+  style: Record<string, string>;
+  attrs?: Record<string, string>;
+}
+
 /**
  * UI Dialog Component for translation display
  */
@@ -17,7 +25,7 @@ export class TranslationDialog {
   ): void {
     const template = this.buildTemplate(result);
 
-    const dialogConfig: any = {
+    const dialogConfig: LogseqUIConfig = {
       key: this.dialogKey,
       close: 'outside',
       template,
@@ -54,7 +62,7 @@ export class TranslationDialog {
       </div>
     `;
 
-    const dialogConfig: any = {
+    const dialogConfig: LogseqUIConfig = {
       key: this.dialogKey,
       close: 'outside',
       template,
@@ -94,7 +102,7 @@ export class TranslationDialog {
       </div>
     `;
 
-    const dialogConfig: any = {
+    const dialogConfig: LogseqUIConfig = {
       key: this.dialogKey,
       close: 'outside',
       template,
