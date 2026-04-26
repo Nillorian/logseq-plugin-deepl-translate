@@ -30,6 +30,27 @@ const settingsSchema: SettingSchemaDesc[] = [
     title: 'Use Pro API',
     description: 'Enable if you have a DeepL Pro account',
   },
+  {
+    key: 'translateShortcut',
+    type: 'string',
+    default: '',
+    title: 'Shortcut: Translate',
+    description: 'Optional keyboard shortcut for "Translate" (e.g., mod+shift+t)',
+  },
+  {
+    key: 'replaceShortcut',
+    type: 'string',
+    default: '',
+    title: 'Shortcut: Replace with Translation',
+    description: 'Optional keyboard shortcut for "Replace with Translation" (e.g., mod+shift+r)',
+  },
+  {
+    key: 'replaceSubBlocksShortcut',
+    type: 'string',
+    default: '',
+    title: 'Shortcut: Replace with Translation + Sub-blocks',
+    description: 'Optional keyboard shortcut for "Replace with Translation + Sub-blocks" (e.g., mod+shift+b)',
+  },
 ];
 
 const pluginState = {
@@ -101,7 +122,7 @@ async function runOnCurrentBlock(actionName: string, action: (blockId: string) =
  * Initialize DeepL client from settings
  */
 function initializeDeepLClient(): boolean {
-  const settings = logseq.settings as any;
+  const settings = getSettings();
 
   if (!settings?.apiKey) {
     logseq.UI.showMsg(
@@ -172,8 +193,8 @@ async function handleTranslation(blockId: string): Promise<void> {
     }
 
     // Get target language from settings
-    const settings = logseq.settings as any;
-    const targetLang = (settings?.defaultTargetLang as string) || 'EN';
+    const settings = getSettings();
+    const targetLang = settings.defaultTargetLang || 'EN';
 
     // Create translation request
     const translationRequest: TranslationRequest = {
@@ -218,8 +239,8 @@ async function handleInlineTranslation(blockId: string): Promise<void> {
     }
 
     // Get target language from settings
-    const settings = logseq.settings as any;
-    const targetLang = (settings?.defaultTargetLang as string) || 'EN';
+    const settings = getSettings();
+    const targetLang = settings.defaultTargetLang || 'EN';
 
     // Show loading state with a notification
     logseq.UI.showMsg('⏳ Translating...', 'info');
@@ -271,8 +292,8 @@ async function handleInlineTranslationWithSubBlocks(blockId: string): Promise<vo
     }
 
     // Get target language from settings
-    const settings = logseq.settings as any;
-    const targetLang = (settings?.defaultTargetLang as string) || 'EN';
+    const settings = getSettings();
+    const targetLang = settings.defaultTargetLang || 'EN';
 
     logseq.UI.showMsg(`⏳ Translating ${allBlockIds.length} block(s)...`, 'info');
 
