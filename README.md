@@ -5,11 +5,13 @@ A powerful Logseq plugin that translates block content using the DeepL API. Supp
 ## Features
 
 - 🌐 **Multi-language support** - Translate to/from 30+ languages
-- 🔄 **Two translation modes:**
+- 🔄 **Three translation modes:**
   - **Show Translation** - Display translated text in a dialog
   - **Replace with Translation** - Inline replace block content with translated text
+   - **Replace with Translation + Sub-blocks** - Inline replace parent block and all nested sub-blocks
 - ⚡ **Fast performance** - Lightweight bundled plugin
 - 🎯 **Block-level translation** - Right-click any block to translate
+- ⌨️ **Custom keyboard shortcuts** - Optional per-action shortcut settings for all three actions
 - 🌍 **Auto-language detection** - Automatically detects source language
 
 ## Installation
@@ -32,6 +34,17 @@ A powerful Logseq plugin that translates block content using the DeepL API. Supp
 
 ## Usage
 
+## Demo
+
+### Show Translation
+![Show Translation](docs/feature1.gif)
+
+### Replace with Translation
+![Replace with Translation](docs/feature2.gif)
+
+### Replace with Translation + Sub-blocks
+![Replace with Translation + Sub-blocks](docs/feature3.gif)
+
 ### Show Translation (Dialog)
 1. Right-click any block in Logseq
 2. Click **"🌐 Translate"**
@@ -43,6 +56,24 @@ A powerful Logseq plugin that translates block content using the DeepL API. Supp
 2. Click **"🌐 Replace with Translation"**
 3. Block content is replaced with the translated text
 
+### Replace with Translation + Sub-blocks (Inline)
+1. Right-click any block in Logseq
+2. Click **"🌐 Replace with Translation + Sub-blocks"**
+3. The parent block and all nested sub-blocks are translated in place
+
+### Keyboard Shortcuts
+You can define optional shortcuts in plugin settings for each action:
+- **Shortcut: Translate**
+- **Shortcut: Replace with Translation**
+- **Shortcut: Replace with Translation + Sub-blocks**
+
+Example shortcut formats:
+- `mod+shift+t`
+- `mod+shift+r`
+- `mod+shift+b`
+
+When configured, the shortcut is also shown in the block context menu label.
+
 ## Supported Languages
 
 The plugin supports all DeepL languages.
@@ -51,19 +82,23 @@ The plugin supports all DeepL languages.
 
 Open plugin settings to customize:
 
-| Setting                 | Type    | Default | Description                      |
-| ----------------------- | ------- | ------- | -------------------------------- |
-| API Key                 | String  | -       | Your DeepL API key (required)    |
-| Default Target Language | String  | EN      | Target language for translations |
-| Use Pro API             | Boolean | false   | Enable for DeepL Pro accounts    |
+| Setting                                         | Type    | Default | Description                                                            |
+| ----------------------------------------------- | ------- | ------- | ---------------------------------------------------------------------- |
+| API Key                                         | String  | -       | Your DeepL API key (required)                                          |
+| Default Target Language                         | String  | EN      | Target language for translations                                       |
+| Use Pro API                                     | Boolean | false   | Enable for DeepL Pro accounts                                          |
+| Shortcut: Translate                             | String  | -       | Optional keyboard shortcut for "Translate"                             |
+| Shortcut: Replace with Translation              | String  | -       | Optional keyboard shortcut for "Replace with Translation"              |
+| Shortcut: Replace with Translation + Sub-blocks | String  | -       | Optional keyboard shortcut for "Replace with Translation + Sub-blocks" |
 
 ## How It Works
 
-1. **Block Context Menu** - Plugin registers two menu items on every block
+1. **Block Context Menu** - Plugin registers three menu items on every block
 2. **Content Retrieval** - Fetches block content via Logseq Editor API
 3. **API Call** - Sends text to DeepL API with authentication
-4. **Display/Replace** - Shows result in dialog or replaces block inline
-5. **Auto-detect** - DeepL automatically detects source language
+4. **Display/Replace** - Shows result in dialog or replaces block(s) inline
+5. **Shortcut Commands** - Optional shortcuts trigger the same three actions on the active block
+6. **Auto-detect** - DeepL automatically detects source language
 
 ## API Details
 
